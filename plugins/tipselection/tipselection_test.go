@@ -1,11 +1,11 @@
 package tipselection
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/iotaledger/goshimmer/packages/model/value_transaction"
 	"github.com/iotaledger/goshimmer/plugins/tangle"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test(t *testing.T) {
@@ -19,6 +19,6 @@ func Test(t *testing.T) {
 
 		tangle.Events.TransactionSolid.Trigger(tx)
 
-		fmt.Println(GetTipsCount())
+		assert.Equal(t, 1, GetTipsCount())
 	}
 }

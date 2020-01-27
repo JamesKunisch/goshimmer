@@ -1,23 +1,38 @@
 package tipselection
 
 import (
-	"github.com/iotaledger/goshimmer/packages/datastructure"
+	"math/rand"
+	"sync"
+
 	"github.com/iotaledger/goshimmer/packages/model/meta_transaction"
 	"github.com/iotaledger/iota.go/trinary"
 )
 
-var tips = datastructure.NewRandomMap()
+var (
+	tipSet = make(map[trinary.Hash]struct{})
+	mutex  sync.RWMutex
+)
 
-func GetRandomTip() (result trinary.Trytes) {
-	if randomTipHash := tips.RandomEntry(); randomTipHash != nil {
-		result = randomTipHash.(trinary.Trytes)
-	} else {
-		result = meta_transaction.BRANCH_NULL_HASH
+func GetRandomTip() trinary.Trytes {
+	mutex.RLock()
+	defer mutex.RUnlock()
+
+	if len(tipSet) == 0 {
+		return meta_transaction.BRANCH_NULL_HASH
 	}
-
-	return
+	i := rand.Intn(len(tipSet))
+	for k := range tipSet {
+		if i == 0 {
+			return k
+		}
+		i--
+	}
+	panic("unreachable")
 }
 
 func GetTipsCount() int {
-	return tips.Size()
+	mutex.RLock()
+	defer mutex.RUnlock()
+
+	return len(tipSet)
 }
